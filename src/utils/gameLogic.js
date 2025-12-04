@@ -1,54 +1,87 @@
-export function createBoard(width, height) {
+// Game logic utilities for the Tetris game
+
+export const createBoard = (width, height) => {
   return Array.from({ length: height }, () =>
-    Array.from({ length: width }, () => null)
+    Array.from({ length: width }, () => ({ type: null, merged: false }))
   );
-}
+};
 
-export function checkCollision(piece, position, board) {
-  if (!piece) return true;
-
+export const checkCollision = (piece, position, board) => {
+  if (!piece || !piece.shape) return false;
+  
   for (let y = 0; y < piece.shape.length; y++) {
     for (let x = 0; x < piece.shape[y].length; x++) {
       if (piece.shape[y][x]) {
         const boardY = position.y + y;
         const boardX = position.x + x;
-
+        
+        // Check boundaries
         if (
-          boardY < 0 ||
-          boardY >= board.length ||
           boardX < 0 ||
           boardX >= board[0].length ||
-          (board[boardY][boardX] && board[boardY][boardX].merged)
+          boardY >= board.length
         ) {
+          return true;
+        }
+        
+        // Check collision with merged pieces (only if within board)
+        if (boardY >= 0 && board[boardY][boardX] && board[boardY][boardX].merged) {
           return true;
         }
       }
     }
   }
+  
   return false;
-}
+};
 
-export function clearLines(board) {
+export const clearLines = (board) => {
   let linesCleared = 0;
-  const newBoard = board.reduce((acc, row) => {
-    if (row.every(cell => cell && cell.merged)) {
+  const clearedBoard = board.filter(row => {
+    const isComplete = row.every(cell => cell.type !== null && cell.merged);
+    if (isComplete) {
       linesCleared++;
-      acc.unshift(Array(board[0].length).fill(null));
-    } else {
-      acc.push(row);
+      return false;
     }
-    return acc;
-  }, []);
+    return true;
+  });
+  
+  // Add empty rows at the top
+  while (clearedBoard.length < board.length) {
+    clearedBoard.unshift(
+      Array.from({ length: board[0].length }, () => ({ type: null, merged: false }))
+    );
+  }
+  
+  return { clearedBoard, linesCleared };
+};
 
-  return { clearedBoard: newBoard, linesCleared };
-}
-
-export function rotatePiece(piece) {
-  const rotated = {
+export const rotatePiece = (piece) => {
+  if (!piece || !piece.shape) return piece;
+  
+  const shape = piece.shape;
+  const rows = shape.length;
+  const cols = shape[0].length;
+  
+  // Create rotated shape (90 degrees clockwise)
+  const rotated = [];
+  for (let x = 0; x < cols; x++) {
+    const newRow = [];
+    for (let y = rows - 1; y >= 0; y--) {
+      newRow.push(shape[y][x]);
+    }
+    rotated.push(newRow);
+  }
+  
+  return {
     ...piece,
-    shape: piece.shape[0].map((_, index) =>
-      piece.shape.map(row => row[index]).reverse()
-    )
+    shape: rotated
   };
-  return rotated;
-}
+};
+
+export default {
+  createBoard,
+  checkCollision,
+  clearLines,
+  rotatePiece
+};
