@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 dark:bg-gray-900 transition-colors duration-300;
+  }
+}
+
+@layer utilities {
+  .cell-empty {
+    @apply bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+  }
+  
+  .cell-filled {
+    @apply border-2 border-opacity-50;
+  }
+  
+  .cell-I { @apply bg-cyan-400 border-cyan-500; }
+  .cell-O { @apply bg-yellow-400 border-yellow-500; }
+  .cell-T { @apply bg-purple-400 border-purple-500; }
+  .cell-S { @apply bg-green-400 border-green-500; }
+  .cell-Z { @apply bg-red-400 border-red-500; }
+  .cell-J { @apply bg-blue-400 border-blue-500; }
+  .cell-L { @apply bg-orange-400 border-orange-500; }
+}
